@@ -1,0 +1,44 @@
+Line# 1: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 1: Token <ID> Lexeme haha found
+Line# 1: Token <LPAREN> Lexeme ( found
+Line# 1: Token <RPAREN> Lexeme ) found
+Line# 1: Token <LCURL> Lexeme { found
+Line# 2: Token <RCURL> Lexeme } found
+compound_statement : LCURL RCURL
+	ScopeTable# 2
+	ScopeTable# 1
+func_definition : type_specifier ID LPAREN RPAREN compound_statement
+unit : func_definition 
+program : unit 
+Line# 3: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 3: Token <ID> Lexeme main found
+Line# 3: Token <LPAREN> Lexeme ( found
+Line# 3: Token <RPAREN> Lexeme ) found
+Line# 3: Token <LCURL> Lexeme { found
+Line# 4: Token <RCURL> Lexeme } found
+compound_statement : LCURL RCURL
+	ScopeTable# 3
+	ScopeTable# 1
+	3 --> <haha,FUNCTION ,INT>
+func_definition : type_specifier ID LPAREN RPAREN compound_statement
+unit : func_definition 
+program : program unit 
+Line# 5: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 5: Token <ID> Lexeme a found
+Line# 5: Token <COMMA> Lexeme , found
+declaration_list : ID
+Line# 5: Token <ID> Lexeme b found
+Line# 5: Token <COMMA> Lexeme , found
+declaration_list : declaration_list COMMA ID
+Line# 5: Token <ID> Lexeme c found
+Line# 5: Token <SEMICOLON> Lexeme ; found
+declaration_list : declaration_list COMMA ID
+var_declaration : type_specifier declaration_list SEMICOLON
+unit : var_declaration 
+program : program unit 
+start : program 
+Total lines: 5
+Total errors: 0
