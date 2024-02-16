@@ -33,6 +33,7 @@ class Node{
         string truelist;
         string falselist;
         string nextlist;
+        bool evaluation;
 
 
     public:
@@ -50,6 +51,7 @@ class Node{
         truelist="";
         falselist="";
         nextlist="";
+        evaluation=false;
     }
     
     void setSymbolInfo(SymbolInfo *s){
@@ -137,39 +139,89 @@ class Node{
             vector<pair<string,string>>params = currentFunc->getParams();
             printFuncDefHeader(out,nam);
             enterfunction(out,params);
-        }else if(typeSpecifier=="compound_statement"){
-            nextlist=createLabel();
-            if(child.size()==3){
-                //cout<<"chichi\n";
-                child[1]->nextlist=nextlist;
-            }
-        }else if(typeSpecifier=="statements"){
-            if(child.size()==1){
-                child[0].nextlist=nextlist;
-            }else if(child.size()==2){
-                child[0].nextlist=createLabel();
-                child[1].nextlist=nextlist;
-            }
-        }
-
             for(int i=0;i<child.size();i++){
                 child[i]->getRecursiveCode(out);
             }
 
-
-        if(typeSpecifier=="func_definition"){
             SymbolInfo* currentFunc=child[1]->getSymbolInfo();
             string nam=currentFunc->getName();
             int paramSz = currentFunc->getParams().size();
             printFuncDefFooter(out,nam,paramSz);
             sTable->exitScope();
         }else if(typeSpecifier=="var_declaration"){
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
             string type=child[0]->getTypeSpecifier();
             vector<pair<pair<string,string>,int>> varNameTypeSz=child[1]->getSymbolInfo()->getVars();
             printVarDecl(out,type,varNameTypeSz);
+        }else if(typeSpecifier=="compound_statement"){
+            nextlist=createLabel();
+            if(child.size()==3){
+                //cout<<"chichi\n";
+                child[1]->nextlist=this->nextlist;
+            }
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
         }else if(typeSpecifier=="statements"){
+            if(child.size()==1){
+                child[0].nextlist=this->nextlist;
+            }else if(child.size()==2){
+                child[0].nextlist=createLabel();
+                child[1].nextlist=this->nextlist;
+            }
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
             out<<nextlist<<"\n";
+        }else if(typeSpecifier=="statement"){
+            if(child.size()==1){
+                child[0]->getRecursiveCode(out);
+            }else{
+                if(child[0]->getSymbolInfo()->getType()=="FOR"){
+                    for(int i=0;i<3;i++){
+                        child[i]->getRecursiveCode(out);
+                    }//initializing
+
+                    string loopstart=createLabel();
+                    out<<loopstart<<"\n"; //starting loop
+                    
+                    child[3]->evaluation=true; //assuming it is true
+                    child[3]->truelist=createLabel();
+                    child[3]->falselist=this->nextlist;
+
+                    child[6]->nextlist=createLabel();
+
+                    child[3]->getRecursiveCode(out);
+                    
+                    out<<child[3]->truelist<<"\n";
+                    child[6]->getRecursiveCode(out);
+
+                    //not giving any label here cause statement has a label of its own
+
+                    child[4]->getRecursiveCode(out);
+                    out<<"\n\tJMP "<<loopstart<<"\n";
+ 
+                }
+
+            }if(typeSpecifier=="expression_statement"){
+                
+            }
+
         }
+        
+        
+        else{
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
+        }
+
+           
+
+
+
     }
     void enterfunction(ofstream &out,vector<pair<string,string>> paramsOfFunction){
         
