@@ -19,7 +19,7 @@ private:
     string name;
     string type;
     SymbolInfo *nextSymbolPointer;
-    vector<string> parametersForFunction;
+    vector<pair<string,string>> parametersForFunction;
     vector<pair<pair<string,string>,int>> varNameTypeSz;
 
     string inherentType;
@@ -33,7 +33,7 @@ public:
         name="";
         type="";
         nextSymbolPointer=NULL;
-        parametersForFunction=vector<string> ();
+        parametersForFunction=vector<pair<string,string>> ();
         varNameTypeSz=vector<pair<pair<string,string>,int>> ();
         inherentType="";
         rettypeORarrType="";
@@ -75,7 +75,7 @@ public:
     {
         return nextSymbolPointer;
     }
-    vector<string> getParams(){
+    vector<pair<string,string>> getParams(){
         return parametersForFunction;
     }
     vector<pair<pair<string,string>,int>> getVars(){
@@ -90,7 +90,7 @@ public:
     string getRettypeOrArrayType(){
         return rettypeORarrType;
     }
-    void addType(string tp){
+    void addParam(pair<string,string>tp){
         parametersForFunction.push_back(tp);
     }
     void addVar(pair<pair<string,string>,int> pr){
@@ -108,7 +108,7 @@ public:
     {
         nextSymbolPointer = ptr;
     }
-    void setParams(vector<string> p){
+    void setParams(vector<pair<string,string>> p){
         parametersForFunction=p;
     }
     void setArraySize(int sz){
@@ -129,7 +129,7 @@ public:
             return false;
         }
         for(int i=0;i<sinfo->getParams().size();i++){
-            if(this->parametersForFunction[i]!=sinfo->getParams()[i]){
+            if(this->parametersForFunction[i].second!=sinfo->getParams()[i].second){
                 //cout<<"nanana\n";
                 return false;
             }

@@ -1,5 +1,4 @@
-//next insert in stable
-
+//change declaration list
 
 %{
 #include<iostream>
@@ -84,7 +83,7 @@ start : program
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("start");
-		nd->setGrammar("start : program ");
+		nd->setGrammar("start : program");
 		nd->addChild($1);
 		$$=nd;
 		outlog<<$$->getGrammar()<<"\n";
@@ -100,7 +99,7 @@ program : program unit
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("program");
-		nd->setGrammar("program : program unit ");
+		nd->setGrammar("program : program unit");
 		nd->addChild($1);
 		nd->addChild($2);
 		$$=nd;
@@ -209,7 +208,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 		func->setType($2->getType());
 		func->setName($2->getName());
 		for(int i=0;i<paramsOfFunction.size();i++){
-			func->addType(paramsOfFunction[i].second);
+			func->addParam(paramsOfFunction[i]);
 		}
 		paramsOfFunction.clear();
 		SymbolInfo* fnd=sTable->LookUp($2->getName());
@@ -339,7 +338,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statem
 		func->setType($2->getType());
 		func->setName($2->getName());
 		for(int i=0;i<paramsOfFunction.size();i++){
-			func->addType(paramsOfFunction[i].second);
+			func->addParam(paramsOfFunction[i]);
 		}
 		paramsOfFunction.clear();
 		SymbolInfo* fnd=sTable->LookUp($2->getName());
@@ -638,6 +637,9 @@ var_declaration : type_specifier declaration_list SEMICOLON
 		$$=nd;
 		outlog<<$$->getGrammar()<<"\n";
 
+		SymbolInfo *declarationSymbol=new SymbolInfo();
+		declarationSymbol->setName("declaration_list");
+	
 		for(int i=0;i<varNameTypeSz.size();i++){
 			SymbolInfo *sinfo=new SymbolInfo();
 			sinfo->setName(varNameTypeSz[i].first.first);
@@ -652,6 +654,7 @@ var_declaration : type_specifier declaration_list SEMICOLON
 				outerror<<"Line# "<<@$.first_line<<": "<<"Variable or field '"<<sinfo->getName()<<"'declared void \n";
 			}else if(cmp==NULL){
 				sTable->Insert(sinfo);
+				declarationSymbol->addVar(varNameTypeSz[i]);
 			}else{
 				// //<<cmp->getName()<<" "<<cmp->getRettypeOrArrayType()<<"\n";
 				errorcount++;
@@ -660,6 +663,7 @@ var_declaration : type_specifier declaration_list SEMICOLON
 			
 	
 		}
+		$2->setSymbolInfo(declarationSymbol);
 		varNameTypeSz.clear();
 
 		}
@@ -729,9 +733,9 @@ declaration_list : declaration_list COMMA ID
 			nd_com->setGrammar($2->getType()+" : "+$2->getName());
 			nd_com->setSymbolInfo($2);
 			Node* nd_id=new Node();
+
 			nd_id->setStart(@3.first_line);
 			nd_id->setEnd(@3.last_line);
-			//nd_id->setName($3->getName());
 			$3->setInherentType("variable");
 			nd_id->setTypeSpecifier($3->getType());
 			nd_id->setSymbolInfo($3);
@@ -841,6 +845,7 @@ declaration_list : declaration_list COMMA ID
 			nd_id->setStart(@1.first_line);
 			nd_id->setEnd(@1.last_line);
 			//nd_id->setName($1->getName());
+			$1->setInherentType("variable");
 			nd_id->setTypeSpecifier($1->getType());
 			nd_id->setSymbolInfo($1);
 			nd_id->setGrammar($1->getType()+" : "+$1->getName());
@@ -973,7 +978,7 @@ expression_list : expression
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("expression_list");
 			nd->setGrammar("expression_list : expression");
 			nd->addChild($1);
 			$$=nd;
@@ -992,7 +997,7 @@ expression_list : expression
 
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("expression_list");
 			nd->setGrammar("expression_list : expression_list COMMA expression");
 			nd->addChild($1);
 			nd->addChild(nd_lp);
@@ -1020,7 +1025,7 @@ statements : statement
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statements");
 			nd->setGrammar("statements : statements statement");
 			nd->addChild($1);
 			nd->addChild($2);
@@ -1035,7 +1040,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : var_declaration");
 			nd->addChild($1);
 			$$=nd;
@@ -1046,7 +1051,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : expression_statement");
 			nd->addChild($1);
 			$$=nd;
@@ -1057,7 +1062,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : compound_statement");
 			nd->addChild($1);
 			$$=nd;
@@ -1089,7 +1094,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement");
 			nd->addChild(nd_for);
 			nd->addChild(nd_lp);
@@ -1129,7 +1134,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : IF LPAREN expression RPAREN statement");
 			nd->addChild(nd_if);
 			nd->addChild(nd_lp);
@@ -1172,7 +1177,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : IF LPAREN expression RPAREN statement ELSE statement");
 			nd->addChild(nd_if);
 			nd->addChild(nd_lp);
@@ -1218,7 +1223,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : LOOP statement WHILE LPAREN expression RPAREN");
 			nd->addChild(nd_loop);
 			nd->addChild($2);
@@ -1258,7 +1263,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : WHILE LPAREN expression RPAREN statement");
 			nd->addChild(nd_wh);
 			nd->addChild(nd_lp);
@@ -1310,7 +1315,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : PRINTLN LPAREN ID RPAREN SEMICOLON");
 			nd->addChild(nd_pn);
 			nd->addChild(nd_lp);
@@ -1340,7 +1345,7 @@ statement : var_declaration
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("statement");
 			nd->setGrammar("statement : RETURN expression SEMICOLON");
 			nd->addChild(nd_rt);
 			nd->addChild($2);
@@ -1364,7 +1369,7 @@ expression_statement : SEMICOLON
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("expression_statement");
 			nd->setGrammar("expression_statement 	: SEMICOLON");
 			nd->addChild(nd_sc);
 			$$=nd;
@@ -1383,7 +1388,7 @@ expression_statement : SEMICOLON
 			Node* nd=new Node();
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
-			nd->setTypeSpecifier("Non terminal");
+			nd->setTypeSpecifier("expression_statement");
 			nd->setGrammar("expression_statement 	: expression SEMICOLON");
 			nd->addChild($1);
 			nd->addChild(nd_sc);
@@ -1406,7 +1411,7 @@ variable : ID
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("variable");
 		nd->setGrammar("variable : ID");
 
 		SymbolInfo* cmp=sTable->LookUp($1->getName());
@@ -1450,7 +1455,7 @@ variable : ID
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("variable");
 		nd->setGrammar("variable : ID LSQUARE expression RSQUARE");
 		SymbolInfo* cmp=sTable->LookUp($1->getName());
 		if(cmp == NULL)
@@ -1543,7 +1548,7 @@ expression : logic_expression
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("error");
 		nd->setGrammar("syntax error");
 		$$=nd;
 		//outlog<<"Error at line no "<<$$->getStart()<<" : "<<$$->getGrammar()<<"\n";
@@ -1803,7 +1808,7 @@ factor	: variable
 				Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("factor");
 		nd->setGrammar("factor  : ID LPAREN argument_list RPAREN");
 		
 		SymbolInfo* cmp=sTable->LookUp($1->getName());
@@ -1812,7 +1817,7 @@ factor	: variable
 			outerror<< "Line# " << @1.first_line << ": " << "Undeclared function '" << $1->getName() << "'\n";
 
 		}else if(cmp->getInherentType()=="func_def" || cmp->getInherentType()=="func_decl"){
-			vector<string> prev=cmp->getParams();
+			vector<pair<string,string>> prev=cmp->getParams();
 			if(prev.size()<argsOfFunction.size()){
 				errorcount++;
 				outerror << "Line# " << @1.first_line << ": Too many arguments to function '" << $1->getName() << "'\n";
@@ -1823,7 +1828,7 @@ factor	: variable
 
 			}else{
 				for(int i=0;i<prev.size();i++){
-					if(prev[i]==argsOfFunction[i]){
+					if(prev[i].second==argsOfFunction[i]){
 						continue;
 					}
 					// //<<prev[i]<<" "<<argsOfFunction[i]<<"\n";
@@ -1960,7 +1965,7 @@ argument_list : arguments
 			Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("argument_list");
 		nd->setGrammar("argument_list : arguments");
 		nd->addChild($1);
 		$$=nd;
@@ -1971,7 +1976,7 @@ argument_list : arguments
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("argument_list");
 		nd->setGrammar("argument_list : ");
 		$$=nd;
 		outlog<<$$->getGrammar()<<"\n";
@@ -1991,7 +1996,7 @@ arguments : arguments COMMA logic_expression
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("arguments");
 		nd->setGrammar("arguments : arguments COMMA logic_expression");
 		nd->addChild($1);
 		nd->addChild(nd_com);
@@ -2008,7 +2013,7 @@ arguments : arguments COMMA logic_expression
 		Node* nd=new Node();
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
-		nd->setTypeSpecifier("Non terminal");
+		nd->setTypeSpecifier("arguments");
 		nd->setGrammar("arguments : logic_expression");
 		nd->addChild($1);
 		$$=nd;

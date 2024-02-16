@@ -26,6 +26,7 @@ public:
 
     void enterScope()
     {
+        
         ScopeTable *nw = new ScopeTable(allTableSize);
         int prev = currentScopeTable->getChildCnt();
         nw->setID(to_string(++tot));
@@ -33,11 +34,13 @@ public:
         nw->setChildCount(0);
         currentScopeTable->setChildCount(prev + 1);
         currentScopeTable = nw;
+        cout<<"Scope "<<currentScopeTable->getID()<<" created\n";
     }
     void exitScope()
     {
         // if(currentScopeTable==NULL)
         // return;
+         cout<<"Scope "<<currentScopeTable->getID()<<" deleted\n";
         ScopeTable *temp = currentScopeTable;
         currentScopeTable = currentScopeTable->getParentScope();
         delete temp;

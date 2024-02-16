@@ -8,28 +8,36 @@
 .CODE
 
 haha PROC
+
 	PUSH BP
 	MOV BP , SP
 
-	L1 :
+	SUB SP , 4
+L2 :
+
 	MOV SP , BP
 	POP BP
-
-	RET
+	RET 2
 
 haha ENDP
 
 main PROC
+
 	MOV AX , @DATA
 	MOV DS , AX
+
 	PUSH BP
 	MOV BP , SP
 
-	L2 :
+	SUB SP , 26
+
+	SUB SP , 2
+L4 :
+
 	MOV SP , BP
 	POP BP
 
 	MOV AH , 4CH
 	INT 21H
-MAIN ENDP
 
+MAIN ENDP

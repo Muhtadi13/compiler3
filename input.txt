@@ -1,5 +1,8 @@
-int haha(){
+int haha(int p){
+    int te,th;
 }
 int main(){
+    int x,y,z,k[10];
+    int m;
 }
 int a,b,c;

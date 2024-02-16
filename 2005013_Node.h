@@ -13,11 +13,11 @@ extern int labelcount;
 extern SymbolTable *sTable;
 extern vector<pair<pair<string,string>,int>> varNameTypeSz;
 extern int baseOffset;
-extern int baseOffsetPrev=0;
-extern vector<pair<string,string>> paramsOfFunction;
+extern int baseOffsetPrev;
+//extern vector<pair<string,string>> paramsOfFunction;
 extern vector<string> argsOfFunction;
-extern vector<pair<pair<string,string>,int>> varNameTypeSz;
-extern string currentFunction;
+//extern vector<pair<pair<string,string>,int>> varNameTypeSz;
+//extern string currentFunction;
 class Node{
 
     private:
@@ -30,6 +30,9 @@ class Node{
         bool zero;
         bool terminal;
         SymbolInfo *sInfo;
+        string truelist;
+        string falselist;
+        string nextlist;
 
 
     public:
@@ -44,6 +47,9 @@ class Node{
         zero=false;
         terminal=false;
         sInfo=NULL;
+        truelist="";
+        falselist="";
+        nextlist="";
     }
     
     void setSymbolInfo(SymbolInfo *s){
@@ -117,37 +123,58 @@ class Node{
         }
     } 
 
-    void createLabel(ofstream &out){
-
-        out<<"\tL"<<++labelcount<<" :\n";
+    string createLabel(){
+        return "L"+to_string(++labelcount)+" :";
     }
 
     void getRecursiveCode(ofstream &out){
         if(this==nullptr)
         return;
        
-        if(sInfo!=NULL){
-           // cout<<sInfo->getName()<<" "<<sInfo->getInherentType()<<"tptp\n";
-            if(sInfo->getInherentType()=="func_def"){
-                currentFunction=sInfo->getName();
-                paramsOfFunction=sInfo->getParams();
-                printFuncDefHeader(out);
-            }else if(sInfo->getName()=="LCURL"){
-                enterfunction(out);
+        if(typeSpecifier=="func_definition"){
+            SymbolInfo* currentFunc=child[1]->getSymbolInfo();
+            string nam=currentFunc->getName();
+            vector<pair<string,string>>params = currentFunc->getParams();
+            printFuncDefHeader(out,nam);
+            enterfunction(out,params);
+        }else if(typeSpecifier=="compound_statement"){
+            nextlist=createLabel();
+            if(child.size()==3){
+                //cout<<"chichi\n";
+                child[1]->nextlist=nextlist;
+            }
+        }else if(typeSpecifier=="statements"){
+            if(child.size()==1){
+                child[0].nextlist=nextlist;
+            }else if(child.size()==2){
+                child[0].nextlist=createLabel();
+                child[1].nextlist=nextlist;
             }
         }
-         //cout<<typeSpecifier<<"tsr\n";
-        for(int i=0;i<child.size();i++){
-            child[i]->getRecursiveCode(out);
-        }
-        if(sInfo!=NULL){
-             if(sInfo->getInherentType()=="func_def"){
-                printFuncDefFooter(out);
-             }
+
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
+
+
+        if(typeSpecifier=="func_definition"){
+            SymbolInfo* currentFunc=child[1]->getSymbolInfo();
+            string nam=currentFunc->getName();
+            int paramSz = currentFunc->getParams().size();
+            printFuncDefFooter(out,nam,paramSz);
+            sTable->exitScope();
+        }else if(typeSpecifier=="var_declaration"){
+            string type=child[0]->getTypeSpecifier();
+            vector<pair<pair<string,string>,int>> varNameTypeSz=child[1]->getSymbolInfo()->getVars();
+            printVarDecl(out,type,varNameTypeSz);
+        }else if(typeSpecifier=="statements"){
+            out<<nextlist<<"\n";
         }
     }
-    void enterfunction(ofstream &out){
+    void enterfunction(ofstream &out,vector<pair<string,string>> paramsOfFunction){
+        
         sTable->enterScope();
+        //cout<<sTable->getCurrentScopeTable()->getID()<<"ididid\n";
         sTable->getCurrentScopeTable()->setBaseOffset(baseOffset);
         int tmpoffset=paramsOfFunction.size()*2+2;
         tmpoffset=-tmpoffset;
@@ -160,8 +187,8 @@ class Node{
                 tmpoffset+=2;
 				sTable->Insert(sinfo);	
         }
-        //might need to add isarray or not
-        paramsOfFunction.clear();
+        //might need to add isarray or not for params
+        //paramsOfFunction.clear();
 
 
     }
@@ -198,61 +225,78 @@ class Node{
     void printAssemblyCode(ofstream &out){
          out<<".MODEL SMALL\n.STACK 100H\n\n.DATA\n";
         printGlobalVars(out);
-         out << ".CODE" << "\n\n" ;
+         out << ".CODE" << "\n" ;
          getRecursiveCode(out);
     }
-    void printFuncDefHeader(ofstream &out){  
-            
-	    out << sInfo->getName() << " PROC\n" ; 
-        if(sInfo->getName() == "main"){
-            out << "\tMOV AX , @DATA\n\tMOV DS , AX\n" ;  
+
+    void printFuncDefHeader(ofstream &out,string nam){ 
+
+         
+	    out<<"\n" << nam << " PROC\n" ; 
+        if(nam == "main"){
+            out << "\n\tMOV AX , @DATA\n\tMOV DS , AX\n" ;  
         }
-        string code = "\tPUSH BP\n"
-                    "\tMOV BP , SP\n"
-                    "\n";
+        string code = "\n\tPUSH BP\n"
+                    "\tMOV BP , SP\n";
 
         out << code ; 
         
     }
-    void printFuncDefFooter(ofstream &out){
+    void printFuncDefFooter(ofstream &out,string nam,int sz){
         
-         
-         createLabel(out);
-         string code = "\tMOV SP , BP\n"
-                        "\tPOP BP\n\n" ; 
+          
+         out<<createLabel()<<"\n";
+         string code = "\n\tMOV SP , BP\n"
+                        "\tPOP BP\n" ; 
         out << code ; 
            
 
-        if(sInfo->getName() == "main"){ 
+        if(nam == "main"){ 
            
-            out <<	"\tMOV AH , 4CH\n" ; 
+            out <<	"\n\tMOV AH , 4CH\n" ; 
             out <<	"\tINT 21H\n" ; 
-            out << "MAIN ENDP\n\n" ; 
+            out << "\nMAIN ENDP\n" ; 
         } else {
             
-            if(sInfo->getParams().size()==0){
-                out << "\tRET\n\n";
+            if(sz==0){
+                out << "\tRET\n";
 
             }else{
-                out << "\tRET " << sInfo->getParams().size()*2 << "\n\n" ; 
+                out << "\tRET " << sz*2 << "\n" ; 
             }
-            out << sInfo->getName() << " ENDP\n\n" ; 
+            out<<"\n" << nam << " ENDP\n" ; 
         }
+       
     }
 
-    void printVarDecl(ofstream &out){
+    void printVarDecl(ofstream &out,string type,vector<pair<pair<string,string>,int>> varNameTypeSz){
         if(sTable->getCurrentScopeTable()->getID()=="1"){
             
         }else{
-            vector<pair<pair<string,string>,int>> vars=sInfo->getVars();
-            for(int i=0;i<vars.size();i++){
-                
+            cout<<"last\n";
+            int tot=0;
+            for(int i=0;i<varNameTypeSz.size();i++){
+                    SymbolInfo *sinfo=new SymbolInfo();
+                    sinfo->setName(varNameTypeSz[i].first.first);
+                    sinfo->setType(type);
+                    sinfo->setInherentType("variable");
+                    sinfo->setArraySize(varNameTypeSz[i].second);
+                    sinfo->setRettypeOrArrayType(type);
+                    sinfo->setDistanceFromTop(baseOffset+2);
+                    if(varNameTypeSz[i].second>-1){
+                        tot+=varNameTypeSz[i].second;
+                        baseOffset+=varNameTypeSz[i].second*2;
+                    }else{
+                        tot++;
+                        baseOffset+=2;
+                    }
+                    SymbolInfo* cmp=sTable->getCurrentScopeTable()->Lookup(sinfo->getName());
+                    if(!cmp)
+                    sTable->Insert(sinfo);
             }
-
-
-                        
+            if(tot>0)
+            out<<"\n\tSUB SP , "<<tot*2<<"\n";
+		                
         }
-
-         
     }
 };

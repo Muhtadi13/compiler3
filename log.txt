@@ -2,43 +2,96 @@ Line# 1: Token <INT> Lexeme int found
 type_specifier	: INT
 Line# 1: Token <ID> Lexeme haha found
 Line# 1: Token <LPAREN> Lexeme ( found
+Line# 1: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 1: Token <ID> Lexeme p found
+parameter_list  : type_specifier ID
 Line# 1: Token <RPAREN> Lexeme ) found
 Line# 1: Token <LCURL> Lexeme { found
-Line# 2: Token <RCURL> Lexeme } found
-compound_statement : LCURL RCURL
+Line# 2: warning, 1 of tabs needed but got 0 tabs.
+Line# 2: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 2: Token <ID> Lexeme te found
+Line# 2: Token <COMMA> Lexeme , found
+declaration_list : ID
+Line# 2: Token <ID> Lexeme th found
+Line# 2: Token <SEMICOLON> Lexeme ; found
+declaration_list : declaration_list COMMA ID
+var_declaration : type_specifier declaration_list SEMICOLON
+statement : var_declaration
+statements : statement
+Line# 3: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL
 	ScopeTable# 2
+	3 --> <p,INT>
+	6 --> <te,INT>
+	9 --> <th,INT>
 	ScopeTable# 1
-func_definition : type_specifier ID LPAREN RPAREN compound_statement
+func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement
 unit : func_definition 
 program : unit 
-Line# 3: Token <INT> Lexeme int found
+Line# 4: Token <INT> Lexeme int found
 type_specifier	: INT
-Line# 3: Token <ID> Lexeme main found
-Line# 3: Token <LPAREN> Lexeme ( found
-Line# 3: Token <RPAREN> Lexeme ) found
-Line# 3: Token <LCURL> Lexeme { found
-Line# 4: Token <RCURL> Lexeme } found
-compound_statement : LCURL RCURL
+Line# 4: Token <ID> Lexeme main found
+Line# 4: Token <LPAREN> Lexeme ( found
+Line# 4: Token <RPAREN> Lexeme ) found
+Line# 4: Token <LCURL> Lexeme { found
+Line# 5: warning, 1 of tabs needed but got 0 tabs.
+Line# 5: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 5: Token <ID> Lexeme x found
+Line# 5: Token <COMMA> Lexeme , found
+declaration_list : ID
+Line# 5: Token <ID> Lexeme y found
+Line# 5: Token <COMMA> Lexeme , found
+declaration_list : declaration_list COMMA ID
+Line# 5: Token <ID> Lexeme z found
+Line# 5: Token <COMMA> Lexeme , found
+declaration_list : declaration_list COMMA ID
+Line# 5: Token <ID> Lexeme k found
+Line# 5: Token <LSQUARE> Lexeme [ found
+Line# 5: Token <CONST_INT> Lexeme 10 found
+Line# 5: Token <RSQUARE> Lexeme ] found
+declaration_list : declaration_list COMMA ID LSQUARE CONST_INT RSQUARE
+Line# 5: Token <SEMICOLON> Lexeme ; found
+var_declaration : type_specifier declaration_list SEMICOLON
+statement : var_declaration
+statements : statement
+Line# 6: warning, 1 of tabs needed but got 0 tabs.
+Line# 6: Token <INT> Lexeme int found
+type_specifier	: INT
+Line# 6: Token <ID> Lexeme m found
+Line# 6: Token <SEMICOLON> Lexeme ; found
+declaration_list : ID
+var_declaration : type_specifier declaration_list SEMICOLON
+statement : var_declaration
+statements : statements statement
+Line# 7: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL
 	ScopeTable# 3
+	1 --> <y,INT>
+	2 --> <z,INT>
+	9 --> <k,ARRAY>
+	11 --> <x,INT> <m,INT>
 	ScopeTable# 1
 	3 --> <haha,FUNCTION ,INT>
 func_definition : type_specifier ID LPAREN RPAREN compound_statement
 unit : func_definition 
-program : program unit 
-Line# 5: Token <INT> Lexeme int found
+program : program unit
+Line# 8: Token <INT> Lexeme int found
 type_specifier	: INT
-Line# 5: Token <ID> Lexeme a found
-Line# 5: Token <COMMA> Lexeme , found
+Line# 8: Token <ID> Lexeme a found
+Line# 8: Token <COMMA> Lexeme , found
 declaration_list : ID
-Line# 5: Token <ID> Lexeme b found
-Line# 5: Token <COMMA> Lexeme , found
+Line# 8: Token <ID> Lexeme b found
+Line# 8: Token <COMMA> Lexeme , found
 declaration_list : declaration_list COMMA ID
-Line# 5: Token <ID> Lexeme c found
-Line# 5: Token <SEMICOLON> Lexeme ; found
+Line# 8: Token <ID> Lexeme c found
+Line# 8: Token <SEMICOLON> Lexeme ; found
 declaration_list : declaration_list COMMA ID
 var_declaration : type_specifier declaration_list SEMICOLON
 unit : var_declaration 
-program : program unit 
-start : program 
-Total lines: 5
+program : program unit
+start : program
+Total lines: 8
 Total errors: 0
