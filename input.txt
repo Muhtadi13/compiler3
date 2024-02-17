@@ -1,8 +1,11 @@
 int haha(int p){
     int te,th;
+    te=5;
 }
 int main(){
     int x,y,z,k[10];
     int m;
+    y=2;
+    x=1;
 }
 int a,b,c;

@@ -33,10 +33,7 @@ bool globalScope=true;
 int labelcount=0;
 int baseOffset=0;
 int baseOffsetPrev=0;
-string currentFunction="";
-
-
-
+string activeFunction="";
 
 void yyerror(char *s)
 {
@@ -80,6 +77,7 @@ void yyerror(char *s)
 start : program
 	{
 		Node* nd=new Node();
+		nd->setName("start");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("start");
@@ -96,6 +94,7 @@ start : program
 program : program unit 
 	{
 		Node* nd=new Node();
+		nd->setName("program");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("program");
@@ -109,6 +108,7 @@ program : program unit
 	| unit
 	{
 		Node* nd=new Node();
+		nd->setName("program");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("program");
@@ -122,6 +122,7 @@ program : program unit
 unit : var_declaration
 	{
 		Node* nd=new Node();
+		nd->setName("unit");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("unit");
@@ -133,6 +134,7 @@ unit : var_declaration
     | func_declaration
 	{
 		Node* nd=new Node();
+		nd->setName("unit");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("unit");
@@ -146,6 +148,7 @@ unit : var_declaration
     | func_definition
 	{
 		Node* nd=new Node();
+		nd->setName("unit");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("unit");
@@ -189,6 +192,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 		nd_sc->setGrammar($6->getType()+" : "+$6->getName());
 		nd_sc->setSymbolInfo($6);
 				Node* nd=new Node();
+		nd->setName("func_declaration");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("func_declaration");
@@ -259,6 +263,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 		nd_sc->setSymbolInfo($5);
 
 		Node* nd=new Node();
+		nd->setName("func_declaration");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("func_declaration");
@@ -319,6 +324,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statem
 		nd_rp->setSymbolInfo($5);
 
 		Node* nd=new Node();
+		nd->setName("func_definition");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("func_definition");
@@ -383,6 +389,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statem
 		nd_rp->setSymbolInfo($4);
 
 		Node* nd=new Node();
+		nd->setName("func_definition");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("func_definition");
@@ -436,6 +443,7 @@ parameter_list  : parameter_list COMMA type_specifier ID
 		nd_id->setSymbolInfo($4);
 
 		Node* nd=new Node();
+		nd->setName("parameter_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("parameter_list");
@@ -460,6 +468,7 @@ parameter_list  : parameter_list COMMA type_specifier ID
 		nd_com->setSymbolInfo($2);
 
 		Node* nd=new Node();
+		nd->setName("parameter_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("parameter_list");
@@ -486,6 +495,7 @@ parameter_list  : parameter_list COMMA type_specifier ID
 		nd_id->setGrammar($2->getType()+" : "+$2->getName());
 
 		Node* nd=new Node();
+		nd->setName("parameter_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("parameter_list");
@@ -500,6 +510,7 @@ parameter_list  : parameter_list COMMA type_specifier ID
 		| type_specifier
 		{
 					Node* nd=new Node();
+		nd->setName("parameter_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("parameter_list");
@@ -518,6 +529,7 @@ parameter_list  : parameter_list COMMA type_specifier ID
 			yyerrok;
 
 			Node* nd=new Node();
+			nd->setName("parameter_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("parameter_list");
@@ -569,6 +581,7 @@ compound_statement : LCURL{
 
 
 		Node* nd=new Node();
+		nd->setName("compound_statement");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("compound_statement");
@@ -601,6 +614,7 @@ compound_statement : LCURL{
 		nd_rc->setSymbolInfo($2);
 
 		Node* nd=new Node();
+		nd->setName("compound_statement");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("compound_statement");
@@ -627,6 +641,7 @@ var_declaration : type_specifier declaration_list SEMICOLON
 		nd_sc->setSymbolInfo($3);
 
 		Node* nd=new Node();
+		nd->setName("var_declaration");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("var_declaration");
@@ -679,6 +694,7 @@ type_specifier	: INT
 		nd_int->setSymbolInfo($1);
 				
 				Node* nd=new Node();
+		nd->setName("type_specifier");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("INT");
@@ -697,6 +713,7 @@ type_specifier	: INT
 		nd_fl->setGrammar($1->getType()+" : "+$1->getName());
 		nd_fl->setSymbolInfo($1);
 				Node* nd=new Node();
+		nd->setName("type_specifier");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("FLOAT");
@@ -714,6 +731,7 @@ type_specifier	: INT
 		nd_vd->setGrammar($1->getType()+" : "+$1->getName());
 		nd_vd->setSymbolInfo($1);
 				Node* nd=new Node();
+		nd->setName("type_specifier");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("VOID");
@@ -743,6 +761,7 @@ declaration_list : declaration_list COMMA ID
 			nd_id->setSymbolInfo($3);
 
 			Node* nd=new Node();
+			nd->setName("declaration_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("declaration_list");
@@ -801,6 +820,7 @@ declaration_list : declaration_list COMMA ID
 			nd_rt->setSymbolInfo($6);
 
 			Node* nd=new Node();
+			nd->setName("declaration_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("declaration_list");
@@ -829,6 +849,7 @@ declaration_list : declaration_list COMMA ID
 
 
 					Node* nd=new Node();
+			nd->setName("declaration_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("declaration_list");
@@ -886,6 +907,7 @@ declaration_list : declaration_list COMMA ID
 			nd_rcurl->setSymbolInfo($7);
 
 			Node* nd=new Node();
+			nd->setName("declaration_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("declaration_list");
@@ -943,6 +965,7 @@ declaration_list : declaration_list COMMA ID
 			nd_rt->setSymbolInfo($4);
 
 			Node* nd=new Node();
+			nd->setName("declaration_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("declaration_list");
@@ -963,6 +986,7 @@ declaration_list : declaration_list COMMA ID
 				yyerrok;
 
 				Node* nd=new Node();
+				nd->setName("declaration_list");
 				nd->setStart(@$.first_line);
 				nd->setEnd(@$.last_line);
 				nd->setTypeSpecifier("declaration_list");
@@ -976,6 +1000,7 @@ declaration_list : declaration_list COMMA ID
 expression_list : expression
 		{
 			Node* nd=new Node();
+			nd->setName("expression_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("expression_list");
@@ -992,9 +1017,10 @@ expression_list : expression
 			nd_lp->setEnd(@2.last_line);
 			nd_lp->setTypeSpecifier($2->getType());
 			nd_lp->setGrammar($2->getType()+" : "+$2->getName());
-			Node* nd=new Node();
 			nd_lp->setSymbolInfo($2);
 
+			Node* nd=new Node();
+			nd->setName("expression_list");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("expression_list");
@@ -1011,6 +1037,7 @@ expression_list : expression
 statements : statement
 		{
 			Node* nd=new Node();
+			nd->setName("statements");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statements");
@@ -1023,6 +1050,7 @@ statements : statement
 	   	| statements statement
 		{
 			Node* nd=new Node();
+			nd->setName("statements");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statements");
@@ -1038,6 +1066,7 @@ statements : statement
 statement : var_declaration
 		{	
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1049,6 +1078,7 @@ statement : var_declaration
 		| expression_statement
 		{
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1060,6 +1090,7 @@ statement : var_declaration
 		| compound_statement
 		{
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1092,6 +1123,7 @@ statement : var_declaration
 			nd_rp->setSymbolInfo($6);
 
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1132,6 +1164,7 @@ statement : var_declaration
 			nd_rp->setSymbolInfo($4);		
 			
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1175,6 +1208,7 @@ statement : var_declaration
 			nd_el->setSymbolInfo($6);		
 			
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1221,6 +1255,7 @@ statement : var_declaration
 			nd_rp->setSymbolInfo($3);
 
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1261,6 +1296,7 @@ statement : var_declaration
 			nd_rp->setSymbolInfo($4);
 
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1313,6 +1349,7 @@ statement : var_declaration
 			nd_sc->setSymbolInfo($5);
 
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1343,6 +1380,7 @@ statement : var_declaration
 			nd_sc->setSymbolInfo($3);
 
 			Node* nd=new Node();
+			nd->setName("statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("statement");
@@ -1367,6 +1405,7 @@ expression_statement : SEMICOLON
 
 					
 			Node* nd=new Node();
+			nd->setName("expression_statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("expression_statement");
@@ -1386,6 +1425,7 @@ expression_statement : SEMICOLON
 			nd_sc->setSymbolInfo($2);
 					
 			Node* nd=new Node();
+			nd->setName("expression_statement");
 			nd->setStart(@$.first_line);
 			nd->setEnd(@$.last_line);
 			nd->setTypeSpecifier("expression_statement");
@@ -1409,6 +1449,7 @@ variable : ID
 		nd_id->setGrammar($1->getType()+" : "+$1->getName());
 		
 		Node* nd=new Node();
+		nd->setName("variable");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("variable");
@@ -1453,6 +1494,7 @@ variable : ID
 		nd_rt->setSymbolInfo($4);
 				
 		Node* nd=new Node();
+		nd->setName("variable");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("variable");
@@ -1499,6 +1541,7 @@ variable : ID
 expression : logic_expression	
 	{
 		Node* nd=new Node();
+		nd->setName("expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1518,6 +1561,7 @@ expression : logic_expression
 		nd_ap->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1559,6 +1603,7 @@ expression : logic_expression
 logic_expression : rel_expression 	
 		{
 			Node* nd=new Node();
+			nd->setName("logic_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1578,6 +1623,7 @@ logic_expression : rel_expression
 		nd_lp->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("logic_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		
@@ -1597,6 +1643,7 @@ logic_expression : rel_expression
 rel_expression	: simple_expression
 		{
 			Node* nd=new Node();
+			nd->setName("rel_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1615,6 +1662,7 @@ rel_expression	: simple_expression
 		nd_lp->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("rel_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 	
@@ -1634,6 +1682,7 @@ rel_expression	: simple_expression
 simple_expression : term 
 		{
 			Node* nd=new Node();
+			nd->setName("simple_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1652,6 +1701,7 @@ simple_expression : term
 		nd_lp->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("simple_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 
@@ -1672,6 +1722,7 @@ simple_expression : term
 term :	unary_expression
 	{
 		Node* nd=new Node();
+		nd->setName("term");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1690,6 +1741,7 @@ term :	unary_expression
 		nd_lp->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("term");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		if($3->getTypeSpecifier()=="VOID" || $1->getTypeSpecifier()=="VOID")
@@ -1725,6 +1777,7 @@ unary_expression : ADDOP unary_expression
 		nd_lp->setSymbolInfo($1);
 				
 		Node* nd=new Node();
+		nd->setName("unary_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($2->getTypeSpecifier());
@@ -1744,6 +1797,7 @@ unary_expression : ADDOP unary_expression
 		nd_lp->setSymbolInfo($1);
 				
 		Node* nd=new Node();
+		nd->setName("unary_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($2->getTypeSpecifier());
@@ -1756,6 +1810,7 @@ unary_expression : ADDOP unary_expression
 		| factor 
 		{
 				Node* nd=new Node();
+		nd->setName("unary_expression");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1774,6 +1829,7 @@ unary_expression : ADDOP unary_expression
 factor	: variable 
 	{
 		Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1806,6 +1862,7 @@ factor	: variable
 		nd_rp->setGrammar($4->getType()+" : "+$4->getName());
 		nd_rp->setSymbolInfo($4);
 				Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("factor");
@@ -1838,6 +1895,7 @@ factor	: variable
 				}
 			}
 			nd->setTypeSpecifier(cmp->getRettypeOrArrayType());
+			
 			// //<<nd->getTypeSpecifier()<<" "<<cmp->getName()<<" ttsf\n";
 		}
 		argsOfFunction.clear();
@@ -1868,6 +1926,7 @@ factor	: variable
 		nd_rp->setSymbolInfo($3);
 				
 		Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($2->getTypeSpecifier());
@@ -1888,6 +1947,7 @@ factor	: variable
 		nd_int->setSymbolInfo($1);
 		
 				Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("INT");
@@ -1911,6 +1971,7 @@ factor	: variable
 		nd_fl->setGrammar($1->getType()+" : "+$1->getName());
 		nd_fl->setSymbolInfo($1);
 				Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("FLOAT");
@@ -1929,6 +1990,7 @@ factor	: variable
 		nd_inc->setGrammar($2->getType()+" : "+$2->getName());
 		nd_inc->setSymbolInfo($2);		
 				Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1948,6 +2010,7 @@ factor	: variable
 		nd_dec->setGrammar($2->getType()+" : "+$2->getName());
 		nd_dec->setSymbolInfo($2);		
 				Node* nd=new Node();
+		nd->setName("factor");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier($1->getTypeSpecifier());
@@ -1963,6 +2026,7 @@ factor	: variable
 argument_list : arguments
 		{
 			Node* nd=new Node();
+		nd->setName("argument_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("argument_list");
@@ -1974,6 +2038,7 @@ argument_list : arguments
 		|
 		{
 		Node* nd=new Node();
+		nd->setName("argument_list");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("argument_list");
@@ -1994,6 +2059,7 @@ arguments : arguments COMMA logic_expression
 		nd_com->setSymbolInfo($2);
 				
 		Node* nd=new Node();
+		nd->setName("arguments");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("arguments");
@@ -2011,6 +2077,7 @@ arguments : arguments COMMA logic_expression
 	    | logic_expression
 		{
 		Node* nd=new Node();
+		nd->setName("arguments");
 		nd->setStart(@$.first_line);
 		nd->setEnd(@$.last_line);
 		nd->setTypeSpecifier("arguments");

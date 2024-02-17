@@ -14,6 +14,16 @@ haha PROC
 
 	SUB SP , 4
 L2 :
+	PUSH CX
+	PUSH BP
+	MOV BX, 2
+	ADD BP, BX
+	POP AX
+	POP CX
+	MOV [BP], CX
+	MOV BP, AX
+L1 :
+L3 :
 
 	MOV SP , BP
 	POP BP
@@ -30,9 +40,29 @@ main PROC
 	MOV BP , SP
 
 	SUB SP , 26
+L7 :
 
 	SUB SP , 2
+L6 :
+	PUSH CX
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	POP AX
+	POP CX
+	MOV [BP], CX
+	MOV BP, AX
+L5 :
+	PUSH CX
+	PUSH BP
+	MOV BX, 2
+	ADD BP, BX
+	POP AX
+	POP CX
+	MOV [BP], CX
+	MOV BP, AX
 L4 :
+L8 :
 
 	MOV SP , BP
 	POP BP

@@ -26,6 +26,7 @@ private:
     int arraySize;
     string rettypeORarrType;
     int fromTopOfStack;
+    string terminal;
 
 
 public:
@@ -39,6 +40,7 @@ public:
         rettypeORarrType="";
         arraySize=-1;
         fromTopOfStack=0;
+        terminal="";
     }
     SymbolInfo(const SymbolInfo &s)
     {
@@ -50,17 +52,27 @@ public:
         arraySize=s.arraySize;
         rettypeORarrType=s.rettypeORarrType;
         nextSymbolPointer = NULL;
+        fromTopOfStack=s.fromTopOfStack;
+        terminal=s.terminal;
     }
     ~SymbolInfo()
     {
         nextSymbolPointer = NULL; 
         parametersForFunction.clear();
+        varNameTypeSz.clear();
     }
     void setDistanceFromTop(int x){
         fromTopOfStack=x;
     }
     int getDistanceFromTop(){
         return fromTopOfStack;
+    }
+    string getTerminal(){
+        return terminal;
+    }
+
+    void setTerminal(string tr){
+        terminal=tr;
     }
 
     string getName()
@@ -80,6 +92,9 @@ public:
     }
     vector<pair<pair<string,string>,int>> getVars(){
         return varNameTypeSz;
+    }
+     void setVars(vector<pair<pair<string,string>,int>> vars){
+        varNameTypeSz=vars;
     }
     int getArraySize(){
         return arraySize;

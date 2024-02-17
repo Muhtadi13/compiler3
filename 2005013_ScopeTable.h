@@ -118,6 +118,10 @@ public:
         el->setArraySize(sinfo->getArraySize());
         el->setParams(sinfo->getParams());
         el->setNextSymbolPointer(NULL);
+        el->setDistanceFromTop(sinfo->getDistanceFromTop());
+        el->setVars(sinfo->getVars());
+        el->setTerminal(sinfo->getTerminal());
+
         ind = sdbmhash(el->getName());
 
         if (Lookup(el->getName()) != NULL)
