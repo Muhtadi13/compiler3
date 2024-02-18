@@ -158,17 +158,14 @@ class Node{
             for(int i=0;i<child.size();i++){
                 child[i]->getRecursiveCode(out);
             }
-
             int paramSz = params.size();
-            
-
             out<<last<<":\n";
             printFuncDefFooter(out,nam,paramSz);
             sTable->exitScope();
         }else if(name=="var_declaration"){
-            // for(int i=0;i<child.size();i++){
-            //     child[i]->getRecursiveCode(out);
-            // }
+            for(int i=0;i<child.size();i++){
+                child[i]->getRecursiveCode(out);
+            }
             string type=child[0]->getTypeSpecifier();
             vector<pair<pair<string,string>,int>> varNameTypeSz=child[1]->getSymbolInfo()->getVars();
             string scope=sTable->getCurrentScopeTable()->getID();
@@ -178,10 +175,11 @@ class Node{
                 printVarDecl(out,type,varNameTypeSz);
             }
         }else if(name=="compound_statement"){
+            if(nextlist=="")
                 nextlist=createLabel();
             if(child.size()==3){
                 //cout<<"chichi\n";
-                child[1]->nextlist=this->nextlist;
+                flowControl(child[1],"",falselist,nextlist,isItABoolean);
             }
             for(int i=0;i<child.size();i++){
                 child[i]->getRecursiveCode(out);
@@ -200,6 +198,7 @@ class Node{
 
         }else if(name=="statement"){
             if(child.size()==1){
+                //flowControl(child[0],truelist,falselist,nextlist,isItABoolean);
                 child[0]->getRecursiveCode(out);
             }else{
                 if(child[0]->getSymbolInfo()->getType()=="FOR"){
@@ -251,9 +250,6 @@ class Node{
                     child[4]->getRecursiveCode(out);
                     out<<"\n\tJMP "<<loopstart<<"\n";
 
-                }else if(child[0]->getSymbolInfo()->getType()=="DO"){
-                    
-                    
                 }else if(child[0]->getSymbolInfo()->getType()=="PRINTLN"){
                     
 
@@ -343,21 +339,14 @@ class Node{
                 child[0]->getRecursiveCode(out);
                 
             }else if(child.size()==3){
-                child[0]->isItABoolean=isItABoolean;
-                child[2]->isItABoolean=isItABoolean;
                 cout<<"here3\n";
                 cout<<child[0]->getName()<<"\n";
                 if(child[1]->getSymbolInfo()->getName()=="||"){
-                    child[0]->truelist=this->truelist;
-                    child[0]->falselist=createLabel();
-                    child[2]->truelist=this->truelist;
-                    child[2]->falselist=this->falselist;
+                    flowControl(child[0],truelist,createLabel(),"",isItABoolean);
                 }else if(child[1]->getSymbolInfo()->getName()=="&&"){
-                    child[0]->truelist=createLabel();
-                    child[0]->falselist=this->falselist;
-                    child[2]->truelist=this->truelist;
-                    child[2]->falselist=this->falselist;
+                    flowControl(child[0],createLabel(),falselist,"",isItABoolean);
                 }
+                flowControl(child[2],truelist,falselist,"",isItABoolean);
                 cout<<"here4\n";
                 child[0]->getRecursiveCode(out);
                 if(isItABoolean){
@@ -374,7 +363,7 @@ class Node{
             
                 if(!isItABoolean){
                 out<< "\tPOP AX\n";
-                if(child[1]->getName()=="||"){
+                if(child[1]->getSymbolInfo()->getName()=="||"){
                     string x = createLabel();
                     string y = createLabel();
                     string z = createLabel();
@@ -386,7 +375,7 @@ class Node{
                     out<< "\tJCXZ "<< z<< "\n";
                     out<< y<< ":\n";
                     out<< "\tMOV CX, 1\n";
-                    out<< "\tJMP "<< a<< ":\n";
+                    out<< "\tJMP "<< a<< "\n";
                     out<< z<< ":\n";
                     out<< "\tMOV CX, 0\n";
                     out<< a<< ":\n";
@@ -401,7 +390,7 @@ class Node{
                     out<< "\tJMP "<< y<< "\n";
                     out<< x<< ":\n";
                     out<< "\tMOV CX, 0\n";
-                    out<< "\tJMP "<< z<< ":\n";
+                    out<< "\tJMP "<< z<< "\n";
                     out<< y<< ":\n";
                     out<< "\tMOV CX, 1\n";
                     out<< z<< ":\n";
@@ -413,10 +402,7 @@ class Node{
         }else if(name=="rel_expression"){
             
              if(child.size()==1){//only rel_exp i.e. < <= ==
-                child[0]->isItABoolean=this->isItABoolean;
-                child[0]->truelist=this->truelist;
-                child[0]->falselist=this->falselist;
-                child[0]->nextlist=this->nextlist;
+                flowControl(child[0],truelist,falselist,nextlist,isItABoolean);
                 child[0]->getRecursiveCode(out);
                 
             }else if(child.size()==3){
@@ -454,10 +440,7 @@ class Node{
         }else if(name=="simple_expression"){
             
              if(child.size()==1){//only rel_exp i.e. < <= ==
-                child[0]->isItABoolean=this->isItABoolean;
-                child[0]->truelist=this->truelist;
-                child[0]->falselist=this->falselist;
-                child[0]->nextlist=this->nextlist;
+                flowControl(child[0],truelist,falselist,nextlist,isItABoolean);
                 child[0]->getRecursiveCode(out);
                 
             }else if(child.size()==3){
@@ -468,20 +451,14 @@ class Node{
                 out<< "\tPOP AX\n";
                 if(child[1]->getSymbolInfo()->getName()=="+") out<< "\tADD CX, AX\n";
                 if(child[1]->getSymbolInfo()->getName()=="-") out<< "\tSUB AX, CX\n\tMOV CX, AX\n";
-                if(isItABoolean){
-                    out<< "\tJCXZ "<< falselist<< "\n";
-                    out<< "\tJMP "<< truelist<< "\n";
-                }
+                doJump(out,isItABoolean,truelist,falselist);
             
             }
                 
         }else if(name=="term"){
             
              if(child.size()==1){//only rel_exp i.e. < <= ==
-                child[0]->isItABoolean=this->isItABoolean;
-                child[0]->truelist=this->truelist;
-                child[0]->falselist=this->falselist;
-                child[0]->nextlist=this->nextlist;
+                flowControl(child[0],truelist,falselist,nextlist,isItABoolean);
                 child[0]->getRecursiveCode(out);
                 
             }else if(child.size()==3){
@@ -504,10 +481,7 @@ class Node{
                     out<< "\tIDIV CX\n";
                     out<< "\tMOV CX, DX\n";
                 }
-                if(isItABoolean){
-                    out<< "\tJCXZ "<< falselist<< "\n";
-                    out<< "\tJMP "<< truelist<< "\n";
-                }
+                doJump(out,isItABoolean,truelist,falselist);
         
             
             }
@@ -515,30 +489,20 @@ class Node{
         }else if(name=="unary_expression"){
             
              if(child.size()==1){//only rel_exp i.e. < <= ==
-                child[0]->isItABoolean=this->isItABoolean;
-                child[0]->truelist=this->truelist;
-                child[0]->falselist=this->falselist;
-                child[0]->nextlist=this->nextlist;
+                flowControl(child[0],truelist,falselist,nextlist,isItABoolean);
                 child[0]->getRecursiveCode(out);
                 
             }else if(child.size()==2){
 
                 if(child[0]->getSymbolInfo()->getType()=="ADDOP"){
-                    child[1]->isItABoolean=this->isItABoolean;
-                    child[1]->truelist=this->truelist;
-                    child[1]->falselist=this->falselist;
-                    child[1]->nextlist=this->nextlist;
+                    flowControl(child[1],truelist,falselist,nextlist,isItABoolean);
                     child[1]->getRecursiveCode(out);
                     if(child[0]->getSymbolInfo()->getName()=="-"){
                         out<<"\tNEG CX\n";
                     }
-
-
                 }if(child[0]->getSymbolInfo()->getType()=="NOT"){
                     
-                    child[1]->isItABoolean=this->isItABoolean;
-                    child[1]->truelist=this->falselist;
-                    child[1]->falselist=this->truelist;
+                    flowControl(child[1],falselist,truelist,"",isItABoolean);
                     child[1]->getRecursiveCode(out);
                      if(!isItABoolean){
                         string l1 = createLabel();
@@ -581,24 +545,14 @@ class Node{
                         out<< "\tPOP BP\n";
 
                     }
-                    if(isItABoolean){
-                        out<<"\tJCXZ "<<falselist<<"\n";
-                        out<<"\tJMP "<<truelist<<"\n";
-                    }
+                    doJump(out,isItABoolean,truelist,falselist);
                     
                 }else if(child[0]->getTypeSpecifier()=="CONST_INT"){
                     child[0]->getRecursiveCode(out);
                     out<< "\tMOV CX, "+child[0]->getSymbolInfo()->getName()+"\n";
-                    if(isItABoolean){
-                        out<< "\tJCXZ "<< falselist<< "\n";
-                        out<< "\tJMP "<< truelist<< "\n";
-                    }
-                }
-                
-                
+                    doJump(out,isItABoolean,truelist,falselist);
+                }                
             }else if(child.size()==2){
-
-        
 
                 child[0]->getRecursiveCode(out);
                 SymbolInfo* grandChildSymbol=sTable->LookUp(child[0]->getChild()[0]->getSymbolInfo()->getName());
@@ -634,18 +588,11 @@ class Node{
                     out<< "\tPOP BP\n";
                 }
                 out<< "\tMOV CX, AX\n";
-                    
-                if(isItABoolean){
-                    out<<"\tJCXZ "<<falselist<<"\n";
-                    out<<"\tJMP "<<truelist<<"\n";
-                }
+                doJump(out,isItABoolean,truelist,falselist);
                 
             }else if(child.size()==3){
                 child[1]->getRecursiveCode(out);
-                if(isItABoolean){
-                    out<<"\tJCXZ "<<falselist<<"\n";
-                    out<<"\tJMP "<<truelist<<"\n";
-                }
+                doJump(out,isItABoolean,truelist,falselist);
 
             }else if(child.size()==4){
                 child[2]->getRecursiveCode(out);
@@ -660,10 +607,7 @@ class Node{
                 out<< "\tMOV CX, DX\n";
                 //out<< "\tADD SP, "<< params.size()+2<<"\n";
 
-                if(isItABoolean){
-                    out<<"\tJCXZ "<<falselist<<"\n";
-                    out<<"\tJMP "<<truelist<<"\n";
-                }
+                doJump(out,isItABoolean,truelist,falselist);
 
             }
                 
@@ -698,9 +642,7 @@ class Node{
                     out<< "\tMOV BX, "<< -childSymbol->getDistanceFromTop()<< "\n";
                     out<< "\tADD BP, BX\n";
                 }
-
             }
-
         }else if(name=="argument_list"){
             if(child.size()>0)
             child[0]->getRecursiveCode(out);
@@ -711,7 +653,7 @@ class Node{
             if(child.size()==3){
                 child[2]->getRecursiveCode(out);
             }
-            cout<<"jaja\n";
+            //cout<<"jaja\n";
             out<<"\tPUSH CX\n";
             
         }else{
@@ -719,11 +661,6 @@ class Node{
                 child[i]->getRecursiveCode(out);
             }
         }
-
-           
-
-
-
     }
     void enterfunction(ofstream &out,vector<pair<string,string>> paramsOfFunction){
         
@@ -743,7 +680,7 @@ class Node{
                // cout<<sinfo->getName()<<" "<<sinfo->getDistanceFromTop()<<"sdfs\n";
 				sTable->Insert(sinfo);	
         }
-        //might need to add isarray or not for params
+        //might need to add array or not for params
         //paramsOfFunction.clear();
 
 
@@ -765,7 +702,7 @@ class Node{
                 if(stemp->getInherentType()=="variable"){
             
                     out <<stemp->getName()<<" DW "<< abs(stemp->getArraySize()) << " DUP (0000H)\n";
-                    baseOffset+=(2*stemp->getArraySize());
+                        // baseOffset+=(2*stemp->getArraySize());
                         //out<<stemp->getType()<<"\n"; 
                 }
                 stemp->setDistanceFromTop(-100);
@@ -774,6 +711,13 @@ class Node{
         }
 
 
+    }
+    void doJump(ofstream &out,bool really,string truely,string falsely){
+        if(really){
+            out<<"\tCMP CX , 0\n";
+            out<<"\tJE "<<falsely<<"\n";
+            out<<"\tJMP "<<truely<<"\n";
+        }
     }
 
     void printAssemblyCode(ofstream &out){
@@ -798,8 +742,6 @@ class Node{
         
     }
     void printFuncDefFooter(ofstream &out,string nam,int sz){
-        
-          
          
          string code = "\n\tMOV SP , BP\n"
                         "\tPOP BP\n" ; 
