@@ -1,0 +1,2 @@
+Line# 5: Undeclared function 'func'
+Line# 12: Type mismatch for argument 2 of 'func'

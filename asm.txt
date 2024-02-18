@@ -2,34 +2,161 @@
 .STACK 100H
 
 .DATA
- DW c INT
- DW a INT
- DW b INT
 .CODE
 
-haha PROC
+func PROC
 
 	PUSH BP
 	MOV BP , SP
 
-	SUB SP , 4
-L2 :
+	SUB SP , 24
+L5 :
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+
+	PUSH CX
+	MOV CX, 0
+	POP AX
+	CMP AX,CX
+		JE L6 :
+	JMP L4 :
+L6 ::
+	MOV CX, 0
+	MOV DX,CX
+	JMP L1 :
+L4 :
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
 	PUSH CX
 	PUSH BP
-	MOV BX, 2
+	MOV BX, -2
 	ADD BP, BX
 	POP AX
 	POP CX
 	MOV [BP], CX
 	MOV BP, AX
-L1 :
 L3 :
+	PUSH BP
+	MOV BX, 6
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+	PUSH CX
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+
+	PUSH CX
+	MOV CX, 1
+	POP AX
+	SUB AX, CX
+	MOV CX, AX
+	PUSH CX
+	CALL func
+	MOV CX, DX
+	ADD SP, 4
+
+	PUSH CX
+	PUSH BP
+	MOV BX, -2
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+	POP AX
+	ADD CX, AX
+	MOV DX,CX
+	JMP L1 :
+L2 :
+L1 :
+
+	MOV SP , BP
+	POP BP
+	RET 4
+
+func ENDP
+
+func2 PROC
+
+	PUSH BP
+	MOV BP , SP
+
+	SUB SP , 2
+L11 :
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+
+	PUSH CX
+	MOV CX, 0
+	POP AX
+	CMP AX,CX
+		JE L12 :
+	JMP L10 :
+L12 ::
+	MOV CX, 0
+	MOV DX,CX
+	JMP L7 :
+L10 :
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+	PUSH CX
+	PUSH BP
+	MOV BX, -2
+	ADD BP, BX
+	POP AX
+	POP CX
+	MOV [BP], CX
+	MOV BP, AX
+L9 :
+	MOV CX, 1
+	PUSH CX
+	PUSH BP
+	MOV BX, 4
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+
+	PUSH CX
+	MOV CX, 1
+	POP AX
+	SUB AX, CX
+	MOV CX, AX
+	PUSH CX
+	CALL func
+	MOV CX, DX
+	ADD SP, 4
+
+	PUSH CX
+	PUSH BP
+	MOV BX, -2
+	ADD BP, BX
+	MOV CX, [BP]
+	POP BP
+	POP AX
+	ADD CX, AX
+	MOV DX,CX
+	JMP L7 :
+L8 :
+L7 :
 
 	MOV SP , BP
 	POP BP
 	RET 2
 
-haha ENDP
+func2 ENDP
 
 main PROC
 
@@ -39,30 +166,37 @@ main PROC
 	PUSH BP
 	MOV BP , SP
 
-	SUB SP , 26
-L7 :
-
 	SUB SP , 2
-L6 :
+L17 :
+	MOV CX, 1
+	PUSH CX
+	MOV CX, 7
+	PUSH CX
+	CALL func
+	MOV CX, DX
+	ADD SP, 4
 	PUSH CX
 	PUSH BP
-	MOV BX, 4
+	MOV BX, -2
 	ADD BP, BX
 	POP AX
 	POP CX
 	MOV [BP], CX
 	MOV BP, AX
-L5 :
-	PUSH CX
+L16 :
 	PUSH BP
-	MOV BX, 2
+	MOV BX, -2
 	ADD BP, BX
-	POP AX
-	POP CX
-	MOV [BP], CX
-	MOV BP, AX
-L4 :
-L8 :
+	MOV AX, [BP]
+	CALL PRINTNUMBER
+	CALL NEWLINE
+	POP BP
+L15 :
+	MOV CX, 0
+	MOV DX,CX
+	JMP L13 :
+L14 :
+L13 :
 
 	MOV SP , BP
 	POP BP
@@ -71,3 +205,54 @@ L8 :
 	INT 21H
 
 MAIN ENDP
+new_line proc
+	push ax
+	push dx
+	mov ah,2
+	mov dl,0Dh
+	int 21h
+	mov ah,2
+	mov dl,0Ah
+	int 21h
+	pop dx
+	pop ax
+	ret
+	new_line endp
+ print_output proc  ;print what is in ax
+	push ax
+	push bx
+	push cx
+	push dx
+	push si
+	lea si,number
+	mov bx,10
+	add si,4
+	cmp ax,0
+	jnge negate
+	print:
+	xor dx,dx
+	div bx
+	mov [si],dl
+	add [si],'0'
+	dec si
+	cmp ax,0
+	jne print
+	inc si
+	lea dx,si
+	mov ah,9
+	int 21h
+	pop si
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+	ret
+	negate:
+	push ax
+	mov ah,2
+	mov dl,'-'
+	int 21h
+	pop ax
+	neg ax
+	jmp print
+print_output endp
