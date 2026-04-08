@@ -18,22 +18,8 @@ A fully functional **C Compiler** implemented from scratch. This project handles
 
 ## 📦 Usage
 
-1. **Build the Compiler**
-   ```bash
-   make
-   ```
-
-2. **Compile a C file**
-   ```bash
-   ./compiler input.c -o output.asm
-   ```
-
-3. **Assemble and Link (Linux)**
-   ```bash
-   nasm -f elf32 output.asm -o output.o
-   gcc -m32 output.o -o output
-   ./output
-   ```
+1. **Run the Compiler**
+   ./runner.sh
 
 ## 📄 License
 
